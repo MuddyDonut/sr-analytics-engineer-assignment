@@ -11,6 +11,7 @@ with
             entity_created_by,
             entity_created_at
         from {{ ref("int_entities_unnest") }}
+        where entity_created_at is not null
     )
 
 select
@@ -25,4 +26,4 @@ select
     1 as entity_count,
     current_localtimestamp() as dbt_loaded_at
 from source_data
-where entity_created_at is not null
+
