@@ -5,31 +5,30 @@ Questions to Answer:
 - Which Glossary Terms have been assigned to datasets and/or dashboards?
 - How many datasets and/or dashboards have they been assigned to?
 
-*/ 
+*/
+with
+    urns_with_terms as (
+        select urn, glossary_terms, json_extract_string(term.value, '$.urn') as term_urn
+        from
+            stg_datahub_entities,
+            unnest(json_extract(glossary_terms, '$.terms')::json[]) as term(value)
+        where glossary_terms is not null
+    ),
 
-with urns_with_terms as (
-select
-    urn,
-    glossary_terms,
-    json_extract_string(term.value, '$.urn') as term_urn
-from
-    stg_datahub_entities
-cross join unnest(json_extract(glossary_terms, '$.terms')::json[]) as term(value)
-where
-    glossary_terms is not null
-)
+    term_details as (
+        select
+            json_extract_string(
+                stg_datahub_entities.entity_details, '$.name'
+            ) as term_name,
+            urn
+        from stg_datahub_entities
+    )
 
-select
-  -- stg_datahub_entities.urn as term_urn,
-  json_extract_string(stg_datahub_entities.entity_details, '$.name') as term_name
-  , count(distinct urns_with_terms.urn) as urn_count
-from
-  urns_with_terms
-left join
-  stg_datahub_entities
-  on stg_datahub_entities.urn = urns_with_terms.term_urn
-group by 1--, 2
-order by 2 desc
+select term_name, count(*) as urn_count
+from term_details t
+join urns_with_terms on t.urn = term_urn
+group by term_name
+order by count(*) desc
 ;
 
 /*
@@ -47,3 +46,4 @@ Query Output:
 └───────────────────────┴───────────┘
 
 */
+

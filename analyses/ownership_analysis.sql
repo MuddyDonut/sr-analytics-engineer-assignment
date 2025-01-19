@@ -7,20 +7,34 @@ Questions to Answer:
 - What is their job title?
 
 */
+with
+    entities_with_owners as (
+        select
+            entity_type,
+            urn as entity_urn,
+            json_extract_string(owner_urn.value, '$.owner') as owner_urn
+        from
+            stg_datahub_entities,
+            unnest(json_extract(owners, '$.owners')::json[]) as owner_urn(value)
+        where owners is not null
+    ),
 
-select 
-    a.entity_type,
-    -- c.owner_urn,
-    json_extract_string(b.entity_details, '$.username') username,
-    json_extract_string(b.entity_details, '$.title') as title ,
-    count(distinct a.urn) as cnt
-from stg_datahub_entities a,
-     unnest(json_extract(owners, '$.owners')::json[]) c(owner_urn)
-LEFT OUTER JOIN 
-stg_datahub_entities b
-on json_extract_string(c.owner_urn, '$.owner')=b.urn
-group by 1,2,3--,4
-order by 2,1
+    owner_details as (
+        select
+            urn as owner_urn,
+            json_extract_string(entity_details, '$.username') as username,
+            json_extract_string(entity_details, '$.title') as title
+        from stg_datahub_entities
+        where
+            entity_details is not null
+            and json_extract_string(entity_details, '$.username') is not null
+    )
+
+select e.entity_type, o.username, o.title, count(distinct e.entity_urn) as entity_count
+from entities_with_owners e
+join owner_details o using (owner_urn)
+group by e.entity_type, o.username, o.title
+order by o.username, e.entity_type
 ;
 
 
@@ -44,3 +58,4 @@ Query Output:
 └─────────────┴───────────────────────┴─────────────────────────┴───────┘
 
 */
+
