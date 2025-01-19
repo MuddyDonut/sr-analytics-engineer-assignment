@@ -7,42 +7,34 @@ Questions to Answer:
 - What is their job title?
 
 */
+with
+    entities_with_owners as (
+        select
+            entity_type,
+            urn as entity_urn,
+            json_extract_string(owner_urn.value, '$.owner') as owner_urn
+        from
+            stg_datahub_entities,
+            unnest(json_extract(owners, '$.owners')::json[]) as owner_urn(value)
+        where owners is not null
+    ),
 
-with entities_with_owners as (
-    select 
-        entity_type
-        , urn as entity_urn
-        , json_extract_string(owner_urn.value, '$.owner') as owner_urn
-    from stg_datahub_entities
-        , unnest(json_extract(owners, '$.owners')::json[]) as owner_urn(value)
-    where owners is not null
-),
+    owner_details as (
+        select
+            urn as owner_urn,
+            json_extract_string(entity_details, '$.username') as username,
+            json_extract_string(entity_details, '$.title') as title
+        from stg_datahub_entities
+        where
+            entity_details is not null
+            and json_extract_string(entity_details, '$.username') is not null
+    )
 
-owner_details as (
-    select 
-        urn as owner_urn
-        , json_extract_string(entity_details, '$.username') as username
-        , json_extract_string(entity_details, '$.title') as title
-    from stg_datahub_entities
-    where entity_details is not null
-    and json_extract_string(entity_details, '$.username') is not null
-)
-
-select 
-    e.entity_type
-    , o.username
-    , o.title
-    , count(distinct e.entity_urn) as entity_count
+select e.entity_type, o.username, o.title, count(distinct e.entity_urn) as entity_count
 from entities_with_owners e
-join owner_details o
-    using(owner_urn)
-group by 
-    e.entity_type
-    , o.username
-    , o.title
-order by 
-    o.username
-    , e.entity_type
+join owner_details o using (owner_urn)
+group by e.entity_type, o.username, o.title
+order by o.username, e.entity_type
 ;
 
 
@@ -66,3 +58,4 @@ Query Output:
 └─────────────┴───────────────────────┴─────────────────────────┴───────┘
 
 */
+
