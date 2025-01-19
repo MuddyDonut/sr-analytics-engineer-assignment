@@ -37,3 +37,10 @@ Here are some of my key assumptions while modeling:
 - There are only 5 entity types
 - Urns are the unique identifier for each entity
 
+# Opportunities 
+Some Opportunities for improvements:
+
+- I would love to look at the staging model and make it more modular!
+- For the dbe models, they are pretty simple materializations, but when they need to scale, I would revisit these as incremental models
+- I would want to add more analyses files that utilize the dbt models
+
