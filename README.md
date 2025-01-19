@@ -28,3 +28,12 @@ Don't forget to open duckdb!
 
 ```.open dev.duckdb```
 
+# Assumptions
+Here are some of my key assumptions while modeling:
+
+- Based on the accepted values and the chart, there are 4 Domains
+- Domains only have a relationship with datasets and dashboards
+- Not all domains have descriptions
+- There are only 5 entity types
+- Urns are the unique identifier for each entity
+
