@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: rpt_domain_entities
+    description: "A simple view showing domains and their associated entities"
+    columns:
+      - name: domain_name
+        description: "Name of the domain"
+        tests:
+          - not_null
+
+      - name: domain_description
+        description: "What this domain is used for"
+
+      - name: entity_name
+        description: "Name of the dataset or dashboard"
+
+      - name: entity_type
+        description: "Whether this is a dataset or dashboard"
+
+      - name: entity_description
+        description: "What this dataset or dashboard is used for"
+
+      - name: created_by_user
+        description: "Who created this entity"
+
+      - name: entity_count
+        description: "Number of entities (always 1)"
+        tests:
+          - not_null

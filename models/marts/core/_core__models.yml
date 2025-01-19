@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: dim_domains
+    description: "Dimension table containing domain information"
+    columns:
+      - name: domain_key
+        description: "Unique surrogate key for the domain"
+        tests:
+          - unique
+          - not_null
+
+      - name: domain_urn
+        description: "Natural key/identifier for the domain"
+
+      - name: domain_name
+        description: "Human readable name of the domain"
+        tests:
+          - not_null
+
+      - name: domain_description
+        description: "Description of the domain's purpose"
+
+      - name: dbt_loaded_at
+        description: "Timestamp when this record was loaded"
+        tests:
+          - not_null
+
+  - name: fact_entities
+    description: "Fact table containing entity information and metrics"
+    columns:
+      - name: entity_fact_key
+        description: "Unique surrogate key for the entity fact"
+        tests:
+          - unique
+          - not_null
+
+      - name: domain_key
+        description: "Foreign key to dim_domains"
+        tests:
+          - not_null
+
+      - name: entity_urn
+        description: "Natural key/identifier for the entity"
+        tests:
+          - unique
+          - not_null
+
+      - name: entity_name
+        description: "Name of the entity"
+
+      - name: entity_type
+        description: "Type of entity (dataset, dashboard, etc.)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['dataset', 'dashboard']
+
+      - name: entity_description
+        description: "Description of the entity"
+
+      - name: created_by_user
+        description: "User who created the entity"
+
+      - name: created_timestamp
+        description: "Timestamp when entity was created"
+
+      - name: entity_count
+        description: "Count of entities (always 1 for this grain)"
+
+      - name: dbt_loaded_at
+        description: "Timestamp when record was loaded"
+        tests:
+          - not_null
+
